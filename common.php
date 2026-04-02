@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/zip_utils.php';
+
 function base_path(string $append = ''): string
 {
     $base = __DIR__;
@@ -289,18 +291,7 @@ function run_system_check(): array
 
 function extract_text_from_docx(string $docxPath): string
 {
-    if (!class_exists('ZipArchive')) {
-        throw new RuntimeException('ZIP support is not available on this PHP installation.');
-    }
-
-    $zip = new ZipArchive();
-    if ($zip->open($docxPath) !== true) {
-        throw new RuntimeException('Unable to open DOCX file.');
-    }
-
-    $xml = $zip->getFromName('word/document.xml');
-    $zip->close();
-
+    $xml = zip_get_entry_contents($docxPath, 'word/document.xml');
     if (!is_string($xml) || $xml === '') {
         throw new RuntimeException('No readable document text was found in the DOCX file.');
     }

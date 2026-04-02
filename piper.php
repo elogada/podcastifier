@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/app_config.php';
+require_once __DIR__ . '/zip_utils.php';
+
 function can_download_remote(): bool
 {
     return extension_loaded('curl') || filter_var((string) ini_get('allow_url_fopen'), FILTER_VALIDATE_BOOL);
@@ -39,9 +42,9 @@ function ensure_piper_dirs(): void
 function piper_runtime_manifest(): array
 {
     return [
-        'version' => '2023.11.14-2',
-        'url' => 'https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_windows_amd64.zip',
-        'archive' => 'piper_windows_amd64.zip',
+        'version' => (string) app_config_get('piper.runtime.version', '2023.11.14-2'),
+        'url' => (string) app_config_get('piper.runtime.url', ''),
+        'archive' => (string) app_config_get('piper.runtime.archive', 'piper_windows_amd64.zip'),
     ];
 }
 
@@ -294,26 +297,12 @@ function download_file(string $url, string $destination): void
 
 function extract_zip_archive(string $zipPath, string $destination): void
 {
-    if (!class_exists('ZipArchive')) {
-        throw new RuntimeException('ZIP support is required to install Piper.');
-    }
-
     remove_directory($destination);
     if (!@mkdir($destination, 0777, true) && !is_dir($destination)) {
         throw new RuntimeException('Could not create extraction directory.');
     }
 
-    $zip = new ZipArchive();
-    if ($zip->open($zipPath) !== true) {
-        throw new RuntimeException('Could not open the downloaded Piper archive.');
-    }
-
-    if (!$zip->extractTo($destination)) {
-        $zip->close();
-        throw new RuntimeException('Could not extract the downloaded Piper archive.');
-    }
-
-    $zip->close();
+    zip_extract_archive($zipPath, $destination);
 }
 
 function ensure_piper_runtime_installed(): void
@@ -426,7 +415,7 @@ function run_piper_system_check(): array
 
     $phpOk = version_compare(PHP_VERSION, '8.2.0', '>=');
     $runtimeWritable = is_dir(runtime_path()) && is_writable(runtime_path());
-    $zipAvailable = class_exists('ZipArchive');
+    $archiveSupport = archive_support_available();
     $downloadAvailable = can_download_remote();
     $powerShellDetected = false;
 
@@ -461,9 +450,9 @@ function run_piper_system_check(): array
         ],
         [
             'key' => 'zip',
-            'label' => 'ZIP support available',
-            'ok' => $zipAvailable,
-            'hint' => $zipAvailable ? 'ZIP extension is available.' : 'ZIP support is required for Piper runtime installation and DOCX uploads.',
+            'label' => 'Archive support available',
+            'ok' => $archiveSupport,
+            'hint' => $archiveSupport ? 'ZIP archives can be read in this PHP setup.' : 'ZIP archive support is required for Piper runtime installation and DOCX uploads.',
         ],
         [
             'key' => 'powershell',
@@ -493,7 +482,7 @@ function run_piper_system_check(): array
         'voices' => $voices,
         'catalog' => get_piper_voice_catalog_with_status(),
         'default_voice_id' => default_piper_voice_id(),
-        'downloads_ready' => $downloadAvailable && $zipAvailable,
+        'downloads_ready' => $downloadAvailable && $archiveSupport,
     ];
 }
 
