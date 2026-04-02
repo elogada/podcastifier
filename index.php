@@ -31,9 +31,8 @@ declare(strict_types=1);
     <main id="appRoot" class="app-card hidden" aria-hidden="true">
         <div class="header-row">
             <div>
-                <p class="eyebrow">Local Piper TTS</p>
+                <p class="eyebrow">Local-first audio tool</p>
                 <h1>Podcastifier</h1>
-                <p class="subtle">Paste text or upload a DOCX, then turn it into a local WAV file with Piper.</p>
             </div>
             <div class="status-badge" id="liveStatusBadge">Ready</div>
         </div>
@@ -55,28 +54,39 @@ declare(strict_types=1);
 
                 <label class="field">
                     <span>Paste your text</span>
-                    <textarea id="textInput" name="text" rows="14" placeholder="Paste notes, chapters, or research text here..."></textarea>
+                    <textarea id="textInput" name="text" rows="3" placeholder="Paste notes, chapters, or research text here..."></textarea>
                 </label>
 
                 <label class="field upload-box">
                     <span>Or upload a DOCX file</span>
                     <input type="file" id="docxInput" name="docx" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
                     <small>DOCX text will be extracted and used for the audio.</small>
+<span>Make sure to refresh the page before generating a new podcast playback</span>
                 </label>
             </section>
 
             <section class="panel actions-panel">
                 <div class="button-row">
-                    <button id="generateBtn" class="btn btn-primary" type="submit">Generate WAV</button>
+                    <button id="generateBtn" class="btn btn-primary" type="submit">Generate Podcast</button>
+<p id="statusText" class="status-text">Ready.</p>
                     <button id="stopBtn" class="btn btn-secondary" type="button" disabled>Stop</button>
                 </div>
-                <p id="statusText" class="status-text">Ready.</p>
+            </section>
+            <section class="panel">
+                <div class="audio-row">
+                    <div>
+                        <h2>Podcast Playback</h2>
+
+                    </div>
+                    <a id="downloadLink" class="btn btn-secondary hidden" href="runtime/output.wav" download>Download Podcast</a>
+                </div>
+                <audio id="audioPlayer" controls preload="none" class="audio-player" hidden></audio>
             </section>
 
             <section class="panel">
                 <label class="field">
                     <span>Preview / extracted text</span>
-                    <textarea id="usedTextPreview" rows="10" readonly placeholder="When you upload a DOCX or start a generation, the exact text used will appear here."></textarea>
+                    <textarea id="usedTextPreview" rows="4" readonly placeholder="When you upload a DOCX or start a generation, the exact text used will appear here."></textarea>
                 </label>
             </section>
 
@@ -91,16 +101,6 @@ declare(strict_types=1);
                 <div id="voiceCatalog" class="voice-catalog"></div>
             </section>
 
-            <section class="panel">
-                <div class="audio-row">
-                    <div>
-                        <h2>Playback</h2>
-                        <p class="subtle">The player becomes available when the WAV file is ready.</p>
-                    </div>
-                    <a id="downloadLink" class="btn btn-secondary hidden" href="runtime/output.wav" download>Download WAV</a>
-                </div>
-                <audio id="audioPlayer" controls preload="none" class="audio-player" hidden></audio>
-            </section>
         </form>
     </main>
 </div>
