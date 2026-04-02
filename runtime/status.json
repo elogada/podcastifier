@@ -1,7 +1,10 @@
-﻿{
-    "state":  "failed",
-    "message":  "The speech engine could not finish.",
-    "voice":  "Microsoft David Desktop",
-    "updated_at":  "2026-04-02T15:33:54.7681139+08:00",
-    "error":  "Cannot bind argument to parameter \u0027LiteralPath\u0027 because it is an empty string."
+{
+    "state": "failed",
+    "message": "The speech process stopped before finishing.",
+    "voice": "Microsoft David Desktop",
+    "created_at": "2026-04-02T09:45:07+02:00",
+    "updated_at": "2026-04-02T09:45:39+02:00",
+    "error": "TTS process ended unexpectedly.",
+    "input_chars": 18,
+    "rate": 0
 }

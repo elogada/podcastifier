@@ -1,10 +1,10 @@
 param(
     [Parameter(Position = 0)]
     [string]$Action = 'list',
-    [string]$Input,
-    [string]$Pending,
-    [string]$Output,
-    [string]$StatusFile,
+    [string]$InputPath,
+    [string]$PendingPath,
+    [string]$OutputPath,
+    [string]$StatusFilePath,
     [string]$Voice,
     [int]$Rate = 0
 )
@@ -16,7 +16,7 @@ function Write-Status {
         [string]$ErrorMessage = ''
     )
 
-    if ([string]::IsNullOrWhiteSpace($StatusFile)) {
+    if ([string]::IsNullOrWhiteSpace($StatusFilePath)) {
         return
     }
 
@@ -29,7 +29,7 @@ function Write-Status {
     }
 
     $json = $payload | ConvertTo-Json -Depth 4
-    Set-Content -LiteralPath $StatusFile -Value $json -Encoding UTF8
+    Set-Content -LiteralPath $StatusFilePath -Value $json -Encoding UTF8
 }
 
 try {
@@ -56,22 +56,22 @@ switch ($Action.ToLower()) {
 
     'synth' {
         try {
-            if (-not (Test-Path -LiteralPath $Input)) {
+            if (-not (Test-Path -LiteralPath $InputPath)) {
                 throw 'Input text file was not found.'
             }
 
-            $text = Get-Content -LiteralPath $Input -Raw -Encoding UTF8
+            $text = Get-Content -LiteralPath $InputPath -Raw -Encoding UTF8
             if ([string]::IsNullOrWhiteSpace($text)) {
                 throw 'Input text is empty.'
             }
 
-            $directory = Split-Path -Parent $Output
+            $directory = Split-Path -Parent $OutputPath
             if (-not (Test-Path -LiteralPath $directory)) {
                 New-Item -ItemType Directory -Path $directory -Force | Out-Null
             }
 
-            if ([string]::IsNullOrWhiteSpace($Pending)) {
-                $Pending = $Output
+            if ([string]::IsNullOrWhiteSpace($PendingPath)) {
+                $PendingPath = $OutputPath
             }
 
             $synth = New-Object System.Speech.Synthesis.SpeechSynthesizer
@@ -82,19 +82,19 @@ switch ($Action.ToLower()) {
 
             Write-Status -State 'processing' -Message 'Generating audio...'
 
-            if (Test-Path -LiteralPath $Pending) {
-                Remove-Item -LiteralPath $Pending -Force -ErrorAction SilentlyContinue
+            if (Test-Path -LiteralPath $PendingPath) {
+                Remove-Item -LiteralPath $PendingPath -Force -ErrorAction SilentlyContinue
             }
-            if (Test-Path -LiteralPath $Output) {
-                Remove-Item -LiteralPath $Output -Force -ErrorAction SilentlyContinue
+            if (Test-Path -LiteralPath $OutputPath) {
+                Remove-Item -LiteralPath $OutputPath -Force -ErrorAction SilentlyContinue
             }
 
-            $synth.SetOutputToWaveFile($Pending)
+            $synth.SetOutputToWaveFile($PendingPath)
             $synth.Speak($text)
             $synth.SetOutputToNull()
             $synth.Dispose()
 
-            Move-Item -LiteralPath $Pending -Destination $Output -Force
+            Move-Item -LiteralPath $PendingPath -Destination $OutputPath -Force
             Write-Status -State 'done' -Message 'Audio is ready.'
             exit 0
         } catch {
