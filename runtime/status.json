@@ -1,10 +1,7 @@
-{
-    "state": "failed",
-    "message": "The speech process stopped before finishing.",
-    "voice": "Microsoft David Desktop",
-    "created_at": "2026-04-02T09:45:07+02:00",
-    "updated_at": "2026-04-02T09:45:39+02:00",
-    "error": "TTS process ended unexpectedly.",
-    "input_chars": 18,
-    "rate": 0
+﻿{
+    "state":  "done",
+    "message":  "Audio is ready.",
+    "voice":  "English (United States) - Joe",
+    "updated_at":  "2026-04-02T18:16:24.8891841+08:00",
+    "error":  null
 }

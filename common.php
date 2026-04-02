@@ -114,6 +114,10 @@ function read_json_file(string $path, array $default = []): array
         return $default;
     }
 
+    if (str_starts_with($raw, "\xEF\xBB\xBF")) {
+        $raw = substr($raw, 3);
+    }
+
     $decoded = json_decode($raw, true);
     return is_array($decoded) ? $decoded : $default;
 }

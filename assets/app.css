@@ -63,6 +63,10 @@ body {
   justify-content: space-between;
 }
 
+.compact-row {
+  justify-content: flex-end;
+}
+
 .stack-lg {
   display: grid;
   gap: 18px;
@@ -226,6 +230,49 @@ h2 { margin-bottom: 6px; font-size: 1.1rem; }
   border-top: 1px solid var(--line);
 }
 
+.voice-catalog {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.voice-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid var(--line);
+}
+
+.voice-copy {
+  min-width: 0;
+}
+
+.voice-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.voice-meta {
+  color: var(--muted);
+  font-size: 0.94rem;
+}
+
+.voice-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.14);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  color: #7dd3fc;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
 .audio-player {
   width: 100%;
   margin-top: 12px;
@@ -252,5 +299,10 @@ h2 { margin-bottom: 6px; font-size: 1.1rem; }
   .app-card {
     padding: 18px;
     border-radius: 20px;
+  }
+
+  .voice-row {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

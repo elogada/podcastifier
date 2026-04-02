@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 require __DIR__ . '/common.php';
+require __DIR__ . '/piper.php';
 initialize_json_endpoint();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -9,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 ensure_runtime_dirs();
-$check = run_system_check();
+$check = run_piper_system_check();
 if (!$check['ok']) {
     json_response([
         'ok' => false,
@@ -29,9 +30,9 @@ $voice = trim((string) ($_POST['voice'] ?? ''));
 $rate = (int) ($_POST['rate'] ?? 0);
 $rate = max(-10, min(10, $rate));
 
-$availableVoices = get_installed_voices();
+$availableVoices = array_column(get_installed_piper_voices(), 'id');
 if ($voice === '' || !in_array($voice, $availableVoices, true)) {
-    json_response(['ok' => false, 'message' => 'Please choose an available local voice.'], 422);
+    json_response(['ok' => false, 'message' => 'Please choose an installed Piper voice.'], 422);
 }
 
 $docxText = '';
@@ -66,7 +67,7 @@ if (file_put_contents(input_file(), $finalText, LOCK_EX) === false) {
 $initialStatus = [
     'state' => 'processing',
     'message' => 'Generating audio...',
-    'voice' => $voice,
+    'voice' => get_piper_voice($voice)['label'] ?? $voice,
     'created_at' => date('c'),
     'updated_at' => date('c'),
     'error' => null,
@@ -75,29 +76,22 @@ $initialStatus = [
 ];
 write_json_file(status_file(), $initialStatus);
 
-$script = base_path('tts/windows_tts.ps1');
-$command = build_start_process_command(
-    $script,
-    input_file(),
-    pending_audio_file(),
-    final_audio_file(),
-    status_file(),
-    $voice,
-    $rate
-);
+$command = build_piper_sync_command($voice);
+@shell_exec($command);
+$status = get_status();
 
-$pidOutput = @shell_exec($command);
-$pid = (int) trim((string) $pidOutput);
-
-if ($pid <= 0) {
-    set_status('failed', 'Could not start the local speech engine.', ['error' => 'PowerShell launch failed.']);
-    json_response(['ok' => false, 'message' => 'Could not start the local speech engine.'], 500);
+if (!is_file(final_audio_file()) || ($status['state'] ?? '') === 'failed') {
+    json_response([
+        'ok' => false,
+        'message' => $status['message'] ?? 'The Piper engine could not finish.',
+        'error' => $status['error'] ?? null,
+    ], 500);
 }
 
-file_put_contents(pid_file(), (string) $pid, LOCK_EX);
+@unlink(pid_file());
 json_response([
     'ok' => true,
-    'message' => 'Generation started.',
-    'pid' => $pid,
+    'message' => 'Audio is ready.',
+    'audio_url' => 'runtime/output.wav?v=' . time(),
     'used_text' => $finalText,
 ]);

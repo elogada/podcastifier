@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 require __DIR__ . '/common.php';
+require __DIR__ . '/piper.php';
 initialize_json_endpoint();
 
 $status = get_status();
@@ -18,8 +19,8 @@ if (($status['state'] ?? '') === 'processing' && $pid > 0 && !is_process_running
     } else {
         $status = array_merge($status, [
             'state' => 'failed',
-            'message' => 'The speech process stopped before finishing.',
-            'error' => 'TTS process ended unexpectedly.',
+            'message' => ($status['error'] ?? null) ? 'The Piper engine could not finish.' : 'The Piper process stopped before finishing.',
+            'error' => $status['error'] ?? 'Piper process ended unexpectedly.',
             'updated_at' => date('c'),
         ]);
         write_json_file(status_file(), $status);

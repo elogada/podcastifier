@@ -18,7 +18,10 @@ declare(strict_types=1);
                 <h1>Podcastifier</h1>
                 <p class="subtle">Quick setup check before the app goes live.</p>
             </div>
-            <button id="retryCheckBtn" class="btn btn-secondary" type="button">Retry check</button>
+            <div class="button-row compact-row">
+                <button id="installDefaultBtn" class="btn btn-primary hidden" type="button">Install Default Voice</button>
+                <button id="retryCheckBtn" class="btn btn-secondary" type="button">Retry check</button>
+            </div>
         </div>
 
         <div id="checkList" class="check-list"></div>
@@ -28,9 +31,9 @@ declare(strict_types=1);
     <main id="appRoot" class="app-card hidden" aria-hidden="true">
         <div class="header-row">
             <div>
-                <p class="eyebrow">Windows local TTS</p>
+                <p class="eyebrow">Local Piper TTS</p>
                 <h1>Podcastifier</h1>
-                <p class="subtle">Paste text or upload a DOCX, then turn it into a local WAV file.</p>
+                <p class="subtle">Paste text or upload a DOCX, then turn it into a local WAV file with Piper.</p>
             </div>
             <div class="status-badge" id="liveStatusBadge">Ready</div>
         </div>
@@ -75,6 +78,17 @@ declare(strict_types=1);
                     <span>Preview / extracted text</span>
                     <textarea id="usedTextPreview" rows="10" readonly placeholder="When you upload a DOCX or start a generation, the exact text used will appear here."></textarea>
                 </label>
+            </section>
+
+            <section class="panel">
+                <div class="audio-row">
+                    <div>
+                        <h2>Voice Library</h2>
+                        <p class="subtle">Install extra Piper voices on demand.</p>
+                    </div>
+                    <button id="refreshVoicesBtn" class="btn btn-secondary" type="button">Refresh voices</button>
+                </div>
+                <div id="voiceCatalog" class="voice-catalog"></div>
             </section>
 
             <section class="panel">
