@@ -1,0 +1,103 @@
+<?php
+
+declare(strict_types=1);
+require __DIR__ . '/common.php';
+initialize_json_endpoint();
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    json_response(['ok' => false, 'message' => 'Method not allowed.'], 405);
+}
+
+ensure_runtime_dirs();
+$check = run_system_check();
+if (!$check['ok']) {
+    json_response([
+        'ok' => false,
+        'message' => 'Setup check failed. Please complete the checklist first.',
+        'check' => $check,
+    ], 400);
+}
+
+$current = get_status();
+$runningPid = is_file(pid_file()) ? (int) trim((string) file_get_contents(pid_file())) : 0;
+if (($current['state'] ?? '') === 'processing' && $runningPid > 0 && is_process_running($runningPid)) {
+    json_response(['ok' => false, 'message' => 'A generation task is already running. Please stop it first.'], 409);
+}
+
+$text = trim((string) ($_POST['text'] ?? ''));
+$voice = trim((string) ($_POST['voice'] ?? ''));
+$rate = (int) ($_POST['rate'] ?? 0);
+$rate = max(-10, min(10, $rate));
+
+$availableVoices = get_installed_voices();
+if ($voice === '' || !in_array($voice, $availableVoices, true)) {
+    json_response(['ok' => false, 'message' => 'Please choose an available local voice.'], 422);
+}
+
+$docxText = '';
+if (isset($_FILES['docx']) && is_array($_FILES['docx']) && ($_FILES['docx']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+    if (($_FILES['docx']['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+        json_response(['ok' => false, 'message' => 'The DOCX upload could not be read.'], 422);
+    }
+
+    $tmpName = (string) ($_FILES['docx']['tmp_name'] ?? '');
+    $originalName = strtolower((string) ($_FILES['docx']['name'] ?? ''));
+    if ($tmpName === '' || !str_ends_with($originalName, '.docx')) {
+        json_response(['ok' => false, 'message' => 'Only DOCX uploads are supported.'], 422);
+    }
+
+    try {
+        $docxText = extract_text_from_docx($tmpName);
+    } catch (Throwable $e) {
+        json_response(['ok' => false, 'message' => 'DOCX extraction failed: ' . $e->getMessage()], 422);
+    }
+}
+
+$finalText = normalize_input_text($docxText !== '' ? $docxText : $text);
+if ($finalText === '') {
+    json_response(['ok' => false, 'message' => 'Please paste text or upload a DOCX file first.'], 422);
+}
+
+clear_previous_output();
+if (file_put_contents(input_file(), $finalText, LOCK_EX) === false) {
+    json_response(['ok' => false, 'message' => 'Could not save the input text.'], 500);
+}
+
+$initialStatus = [
+    'state' => 'processing',
+    'message' => 'Generating audio...',
+    'voice' => $voice,
+    'created_at' => date('c'),
+    'updated_at' => date('c'),
+    'error' => null,
+    'input_chars' => mb_strlen($finalText),
+    'rate' => $rate,
+];
+write_json_file(status_file(), $initialStatus);
+
+$script = base_path('tts/windows_tts.ps1');
+$command = build_start_process_command(
+    $script,
+    input_file(),
+    pending_audio_file(),
+    final_audio_file(),
+    status_file(),
+    $voice,
+    $rate
+);
+
+$pidOutput = @shell_exec($command);
+$pid = (int) trim((string) $pidOutput);
+
+if ($pid <= 0) {
+    set_status('failed', 'Could not start the local speech engine.', ['error' => 'PowerShell launch failed.']);
+    json_response(['ok' => false, 'message' => 'Could not start the local speech engine.'], 500);
+}
+
+file_put_contents(pid_file(), (string) $pid, LOCK_EX);
+json_response([
+    'ok' => true,
+    'message' => 'Generation started.',
+    'pid' => $pid,
+    'used_text' => $finalText,
+]);
