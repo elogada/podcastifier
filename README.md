@@ -1,71 +1,45 @@
 # Podcastifier
 
-Podcastifier is a local-first Windows web app for turning pasted text or DOCX content into WAV audio through XAMPP and PHP. It is meant for local use by students, researchers, and other solo users who want a setup that stays as simple as possible.
+## Why Did I make This
+
+I get documents a lot at work. And I play a lot of Old School Runescape. Code switching is hard, tabbing out is hard, even harder when you have to focus on catching fish. Ergo I made Podcastifier. With this I can listen to documents being read to me by an AI while doing my fishing loops. No more multi-monitor. No more alt-tabs. No more interuptions during work. This is the future of AI augmentation: *AI assistance, for reading, for play, and for work - concurrently* .
+
+This was designed to be installed with as little installation steps as possible so that students, researchers, and non-techie people can make use of it with as little interaction in the backend as possible.
 
 ## What It Does
 
-- Runs locally on Windows through XAMPP and PHP 8.2+
-- Downloads the Piper runtime on first setup
-- Installs Piper voices on demand from the app
-- Accepts pasted text or a DOCX upload
-- Generates `runtime/output.wav`
-- Lets the user play or download the WAV in the browser
+It uses a *neural (Artificial Intelligence-based) text-to-speech* system called *Piper* that runs locally, inside your PC. No need to be online except on the first run when you download the Piper runtime (the "AI player") and the Piper voices.
 
-## Intended Use
-
-- Podcastifier is designed for one local user at a time.
-- It is not designed for multiple concurrent users or shared hosting.
-- It is meant for light local workloads, not sustained server-style use.
-- Very large inputs, repeated back-to-back generations, or unusually large uploaded files may slow the app down or cause failures.
+_Side note: Did you know that you can train Piper to use your own voice? See the docs here: https://github.com/rhasspy/piper/blob/master/TRAINING.md_
 
 ## Installation
 
-1. Install XAMPP for Windows.
-2. Start Apache from the XAMPP Control Panel.
-3. Extract this project into `xampp/htdocs/podcastifier`.
-4. Open `http://localhost/podcastifier/` or your local vhost URL.
-5. On the setup screen, install the default Piper voice.
-6. Generate audio locally in the browser.
+1. Get *XAMPP 8.2* from the official ApacheFriends website and install Apache. - https://www.apachefriends.org/
+2. Get the latest Podcastifier ZIP from the Releases page. https://github.com/elogada/podcastifier/releases/tag/release
+3. Paste the ZIP's contents at `xampp/htdocs/podcastifier`
+4. Via the XAMPP control panel, `Start` the Apache service
+5. On your browser (Chrome, Edge, Opera, whatever), open `http://localhost/podcastifier/` 
+6. Finish the first check and let it install the voice files. Serve hot.
 
-## First-Run Setup
+## Intended Use
 
-On first run, Podcastifier downloads:
-
-- The pinned Piper Windows runtime
-- The default Piper voice if you choose to install it
-
-Extra voices can be installed later from the in-app voice library.
-
-The pinned Piper runtime URL is stored in `app_config.php`. If you ever need to update the upstream release URL, that is the main file to edit.
+- Podcastifier is designed for *one local user* at a time. It is **not** designed for multiple users.
+- Very large workloads or unusually large uploaded files may fail.
 
 ## Requirements
 
-- Windows
-- XAMPP / Apache
-- PHP 8.2+
-- Internet access the first time Piper runtime or voices are downloaded
-
-## DOCX Support
-
-DOCX upload is supported through a ZIP-based parser.
-
-- If `ZipArchive` is available, PHP can use it directly.
-- If `ZipArchive` is unavailable, Podcastifier includes a pure-PHP fallback for reading DOCX and ZIP archives.
+- *Windows:* Extensively tested on Windows 11 Home and Windows 11 Pro
+- *Apache* via XAMPP 8.2
+- *PHP 8.2+* via XAMPP 8.2
+- *Internet access* the first time Piper runtime or voices are downloaded
 
 ## Voices
 
-Current built-in voice options:
+Built-in voice options:
 
 - `English (United States) - Joe` as the default setup voice
 - `English (Great Britain) - Cori` as an optional install
 - `English (Great Britain) - Alan` as an optional install
-
-## Project Notes
-
-- Podcastifier is intentionally local-first and single-user.
-- Runtime files are generated under `runtime/`.
-- Installed Piper files are also stored under `runtime/`.
-- The app favors easy installation over multi-user scalability.
 
 ## License
 
@@ -76,20 +50,3 @@ That means the software is provided "as is", without warranty. In practical term
 - Misuse, unsupported modifications, or overloading the app with very large files may cause crashes or failed generations.
 - The project does not guarantee suitability for production hosting, shared access, or heavy concurrent workloads.
 - You are responsible for reviewing and testing any local changes you make.
-
-## Files
-
-- `index.php`: Main app page
-- `check.php`: Setup checklist endpoint
-- `generate.php`: Runs Piper generation
-- `status.php`: Returns current status
-- `install_piper.php`: Installs Piper runtime and voices
-- `voices.php`: Returns installed and available Piper voices
-- `common.php`: Shared helpers
-- `piper.php`: Piper download and voice helpers
-- `zip_utils.php`: Pure-PHP ZIP helpers
-- `app_config.php`: App configuration, including the pinned Piper runtime URL
-- `assets/app.js`: Frontend logic
-- `assets/app.css`: Local styles
-- `runtime/.gitkeep`: Runtime folder placeholder
-- `uploads/.gitkeep`: Upload folder placeholder
