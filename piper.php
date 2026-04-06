@@ -84,6 +84,17 @@ function piper_voice_catalog(): array
             'model_url' => 'https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/alan/medium/en_GB-alan-medium.onnx?download=true',
             'config_url' => 'https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/alan/medium/en_GB-alan-medium.onnx.json?download=true',
         ],
+        'en_US-kristin-medium' => [
+            'id' => 'en_US-kristin-medium',
+            'label' => 'English (United States) - Kristin',
+            'description' => 'Optional American English voice with a clear and conversational tone.',
+            'size_label' => '64 MB',
+            'default' => false,
+            'model' => 'en_US-kristin-medium.onnx',
+            'config' => 'en_US-kristin-medium.onnx.json',
+            'model_url' => 'https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/kristin/medium/en_US-kristin-medium.onnx?download=true',
+            'config_url' => 'https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/kristin/medium/en_US-kristin-medium.onnx.json?download=true',
+        ],
     ];
 }
 
