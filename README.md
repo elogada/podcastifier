@@ -40,6 +40,7 @@ Built-in voice options:
 - `English (United States) - Joe` as the default setup voice
 - `English (Great Britain) - Cori` as an optional install
 - `English (Great Britain) - Alan` as an optional install
+- `English (United States) - Kristin` as an optional install
 
 ## License
 
